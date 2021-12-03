@@ -28,7 +28,7 @@ def day_1(day_1_list: List) -> int:
 
 
 i1 = input_opener("1.txt", "\n", int)
-day_1(i1)
+print(day_1(i1))
 
 # %%
 def day_1_2(day_1_2list: List) -> int:
@@ -41,7 +41,7 @@ def day_1_2(day_1_2list: List) -> int:
     return day_1(list(organise_inputs.values()))
 
 
-day_1_2(i1)
+print(day_1_2(i1))
 
 # %%
 def depth_calculator(accum: Dict, movement: Tuple) -> Dict:
@@ -50,16 +50,28 @@ def depth_calculator(accum: Dict, movement: Tuple) -> Dict:
     accum[direction] = accum[direction] + signal * movement[1]
     return accum
 
-def day_2(day_2_list: List) -> int:
+def aim_calculator(accum: Dict, movement: Tuple) -> Dict:
+    signal = -1 if movement[0] == 'up' else 1
+    if movement[0] in ["up", "down"]:
+        accum["aim"] = accum["aim"] + signal * movement[1]
+    else:
+        accum["horizontal"] = accum["horizontal"] + signal * movement[1]
+        accum["vertical"] = accum["vertical"] +  accum["aim"] * movement[1]
+
+    return accum
+
+
+def day_2(day_2_list: List, calculator) -> int:
     mult_factors = functools.reduce(
-        depth_calculator,
+        calculator,
         day_2_list,
-        {"vertical": 0, "horizontal":0}
+        {"vertical": 0, "horizontal":0, "aim": 0}
     )
     return mult_factors["vertical"] * mult_factors["horizontal"]
 
 
 i2 = [(entry.split(" ")[0], int(entry.split(" ")[1])) for entry in input_opener("2.txt", "\n", str)]
-day_2(i2)
+print(day_2(i2, depth_calculator))
+print(day_2(i2, aim_calculator))
 
 # %%
