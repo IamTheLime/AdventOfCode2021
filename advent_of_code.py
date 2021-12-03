@@ -3,7 +3,7 @@
 import math
 import functools
 import traceback
-from typing import List
+from typing import Dict, List, Tuple
 
 def input_opener(filename, sep, as_type):
     try:
@@ -42,5 +42,24 @@ def day_1_2(day_1_2list: List) -> int:
 
 
 day_1_2(i1)
+
+# %%
+def depth_calculator(accum: Dict, movement: Tuple) -> Dict:
+    signal = -1 if movement[0] == 'up' else 1
+    direction = "vertical" if movement[0] in ["up", "down"] else "horizontal"
+    accum[direction] = accum[direction] + signal * movement[1]
+    return accum
+
+def day_2(day_2_list: List) -> int:
+    mult_factors = functools.reduce(
+        depth_calculator,
+        day_2_list,
+        {"vertical": 0, "horizontal":0}
+    )
+    return mult_factors["vertical"] * mult_factors["horizontal"]
+
+
+i2 = [(entry.split(" ")[0], int(entry.split(" ")[1])) for entry in input_opener("2.txt", "\n", str)]
+day_2(i2)
 
 # %%
