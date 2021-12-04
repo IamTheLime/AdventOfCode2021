@@ -75,3 +75,49 @@ print(day_2(i2, depth_calculator))
 print(day_2(i2, aim_calculator))
 
 # %%
+
+def get_mask(matrix) -> Tuple:
+    index_count = {}
+    for row in matrix:
+        for row_index, bit in enumerate(row):
+            current_icount = index_count.get(
+                f"row_index_{row_index}",
+                {"bit_0": 0, "bit_1": 0}
+            )
+            current_icount["bit_0"] += 1 if bit == 0 else 0
+            current_icount["bit_1"] += 1 if bit == 1 else 0
+            index_count[f"row_index_{row_index}"] = current_icount
+    most_common_mask = []
+    least_common_mask = []
+    for value in index_count.values():
+        most_common_mask.append("1" if value["bit_1"] >= value["bit_0"] else "0")
+        least_common_mask.append("0" if value["bit_0"] <= value["bit_1"] else "1")
+    return ''.join(most_common_mask), ''.join(least_common_mask)
+
+def day_3(day_3_matrix: List) -> int:
+    mc, lc = get_mask(day_3_matrix)
+    return int(mc, 2) * int(lc, 2)
+
+def day_3_1(day_3_matrix_original) -> int:
+    min_m = day_3_matrix_original
+    max_m = day_3_matrix_original
+
+    for i in range(0, len(day_3_matrix_original[0])):
+        mcmax, _ = get_mask(max_m)
+        _, lcmin = get_mask(min_m)
+
+        max_m = [ value for value in max_m if value[i] == int(mcmax[i]) or len(max_m) == 1]
+        min_m = [ value for value in min_m if value[i] == int(lcmin[i]) or len(min_m) == 1]
+
+        oxygen = int(''.join([str(val) for val in max_m[0]]), 2)
+        co2 = int(''.join([str(val) for val in min_m[0]]), 2)
+
+    return oxygen * co2
+
+
+
+i3 = input_opener("3.txt", "\n", lambda x: [int(y) for y in list(x)])
+print(day_3(i3))
+print(day_3_1(i3))
+
+# %%
