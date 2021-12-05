@@ -1,9 +1,11 @@
 
-# %%
+
 import math
 import functools
 import traceback
 from typing import Dict, List, Tuple
+
+# Just some aux shit
 
 def input_opener(filename, sep, as_type):
     try:
@@ -12,7 +14,17 @@ def input_opener(filename, sep, as_type):
     except Exception as e:
         print(traceback.format_exc())
 
-# %%
+def list_of_lists_splitter(lst, sep):
+    list_of_sublists = []
+    current_sublist = []
+    for entry in lst:
+        if entry == "sep":
+            list_of_sublists.append(current_sublist)
+            current_sublist = []
+        else:
+            current_sublist.append(entry)
+
+
 # Day 1
 
 def day_1(day_1_list: List) -> int:
@@ -30,7 +42,8 @@ def day_1(day_1_list: List) -> int:
 i1 = input_opener("1.txt", "\n", int)
 print(day_1(i1))
 
-# %%
+# Day 2
+
 def day_1_2(day_1_2list: List) -> int:
     organise_inputs = {}
     for index, entry in enumerate(day_1_2list):
@@ -43,7 +56,8 @@ def day_1_2(day_1_2list: List) -> int:
 
 print(day_1_2(i1))
 
-# %%
+# Day 3
+
 def depth_calculator(accum: Dict, movement: Tuple) -> Dict:
     signal = -1 if movement[0] == 'up' else 1
     direction = "vertical" if movement[0] in ["up", "down"] else "horizontal"
@@ -74,7 +88,7 @@ i2 = [(entry.split(" ")[0], int(entry.split(" ")[1])) for entry in input_opener(
 print(day_2(i2, depth_calculator))
 print(day_2(i2, aim_calculator))
 
-# %%
+# Day 4
 
 def get_mask(matrix) -> Tuple:
     index_count = {}
@@ -115,9 +129,33 @@ def day_3_1(day_3_matrix_original) -> int:
     return oxygen * co2
 
 
-
 i3 = input_opener("3.txt", "\n", lambda x: [int(y) for y in list(x)])
 print(day_3(i3))
 print(day_3_1(i3))
 
-# %%
+# Day 4
+
+def split_into_boards(inpt: List[str]) -> Tuple:
+    bingo_numbers = inpt[0].split(",")
+    boards = {}
+
+
+    num_boards = 0
+
+    boards = list_of_lists_splitter(inpt[1,:], ["\n"])
+    for index, board in boards:
+        print(index, board)
+        # num_boards += 1 if line[0] == "\n" else 0
+        # row_num += -1 if line[0] == "\n" else 1
+        # for num in line.split(" "):
+        #     board
+
+
+    # return bingo_numbers
+
+
+def day_4_1(inpt):
+    split_into_boards(inpt)
+
+i4 = input_opener("4.txt", "\n", str)
+day_4_1(i4)
