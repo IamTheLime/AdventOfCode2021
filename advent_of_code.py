@@ -2,9 +2,13 @@
 
 import math
 import functools
+import os
+from pprint import pprint
+import re
 import traceback
 from typing import Dict, List, Tuple
 
+os.chdir('/Users/tiagolima/Documents/personal_repos/AdventOfCode2021')
 # Just some aux shit
 
 def input_opener(filename, sep, as_type):
@@ -18,12 +22,16 @@ def list_of_lists_splitter(lst, sep):
     list_of_sublists = []
     current_sublist = []
     for entry in lst:
-        if entry == "sep":
-            list_of_sublists.append(current_sublist)
+        if entry == sep:
+            if current_sublist != []:
+                list_of_sublists.append(current_sublist)
             current_sublist = []
         else:
             current_sublist.append(entry)
+    if len(current_sublist) != 0:
+        list_of_sublists.append(current_sublist)
 
+    return list_of_sublists
 
 # Day 1
 
@@ -137,25 +145,43 @@ print(day_3_1(i3))
 
 def split_into_boards(inpt: List[str]) -> Tuple:
     bingo_numbers = inpt[0].split(",")
+    raw_boards = list_of_lists_splitter(inpt[1:], "")
+    board_sizes = {"row_len": len(raw_boards[0]), "col_len": len(re.split("\s+", raw_boards[0][0]))}
     boards = {}
+    for index, board in enumerate(raw_boards):
+        boards[f"board_{index}"] = {"board_number": index}
+        for row_i, row  in enumerate(board):
+            for col_i, column in enumerate(re.split("\s+", row)):
+                boards[f"board_{index}"][column] = (row_i, col_i)
 
-
-    num_boards = 0
-
-    boards = list_of_lists_splitter(inpt[1,:], ["\n"])
-    for index, board in boards:
-        print(index, board)
-        # num_boards += 1 if line[0] == "\n" else 0
-        # row_num += -1 if line[0] == "\n" else 1
-        # for num in line.split(" "):
-        #     board
-
-
-    # return bingo_numbers
+    return bingo_numbers, boards, board_sizes
 
 
 def day_4_1(inpt):
-    split_into_boards(inpt)
+    bingo_numbers, boards, board_sizes = split_into_boards(inpt)
+    import pprint as pp
+    bingo = None
+    print(bingo_numbers)
+    for entry in bingo_numbers:
+        print("CURRENT ENTRY: ", entry)
+        for board_name, board in boards.items():
+            row_col = board.get(entry, None)
+            if row_col:
+                row, column = row_col
+                board_sizes[f"{board_name}_row_count_{row}"] = board_sizes.get(f"row_count_{row}", 0) + 1
+                board_sizes[f"{board_name}_row_{row}"] = board_sizes.get(f"{board_name}_row_{row}", []) + [int(entry)]
+                board_sizes[f"{board_name}_col_count_{column}"] = board_sizes.get(f"col_count_{column}", 0) + 1
+                board_sizes[f"{board_name}_col_{column}"] = board_sizes.get(f"{board_name}_col_{column}", []) + [int(entry)]
+
+            if board_sizes[f"{board_name}_row_count_{row}"] == board_sizes["row_len"]:
+                bingo = (board_name,"row", row, entry)
+            if board_sizes[f"{board_name}_col_count_{column}"] == board_sizes["col_len"]:
+                bingo = (board_name,"col", column, entry)
+        if bingo:
+            if bingo[1] == "row":
+                return sum(board_sizes[f"{bingo[0]}_row_{bingo[2]}"]) * int(bingo[3])
+            else:
+                return sum(board_sizes[f"{bingo[0]}_col_{bingo[2]}"]) * int(bingo[3])
 
 i4 = input_opener("4.txt", "\n", str)
-day_4_1(i4)
+print(day_4_1(i4))
