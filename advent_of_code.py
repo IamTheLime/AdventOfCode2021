@@ -149,39 +149,53 @@ def split_into_boards(inpt: List[str]) -> Tuple:
     board_sizes = {"row_len": len(raw_boards[0]), "col_len": len(re.split("\s+", raw_boards[0][0]))}
     boards = {}
     for index, board in enumerate(raw_boards):
-        boards[f"board_{index}"] = {"board_number": index}
+        boards[f"board_{index}"] = {"board_number": index, "board": {}}
         for row_i, row  in enumerate(board):
-            for col_i, column in enumerate(re.split("\s+", row)):
-                boards[f"board_{index}"][column] = (row_i, col_i)
+            for col_i, column in enumerate(re.split("\s+", row.lstrip(" "))):
+                boards[f"board_{index}"]["board"][column] = (row_i, col_i)
 
     return bingo_numbers, boards, board_sizes
 
-
-def day_4_1(inpt):
+import copy
+def day_4(inpt, only_return_last = False):
     bingo_numbers, boards, board_sizes = split_into_boards(inpt)
-    import pprint as pp
-    bingo = None
-    print(bingo_numbers)
+    bingos =  []
+    board_helper = {}
+    global_results = []
     for entry in bingo_numbers:
-        print("CURRENT ENTRY: ", entry)
         for board_name, board in boards.items():
-            row_col = board.get(entry, None)
+            row_col = board["board"].get(entry, None)
             if row_col:
                 row, column = row_col
-                board_sizes[f"{board_name}_row_count_{row}"] = board_sizes.get(f"row_count_{row}", 0) + 1
-                board_sizes[f"{board_name}_row_{row}"] = board_sizes.get(f"{board_name}_row_{row}", []) + [int(entry)]
-                board_sizes[f"{board_name}_col_count_{column}"] = board_sizes.get(f"col_count_{column}", 0) + 1
-                board_sizes[f"{board_name}_col_{column}"] = board_sizes.get(f"{board_name}_col_{column}", []) + [int(entry)]
+                board_helper[f"{board_name}_tagged_entries"] = set.union(board_helper.get(f"{board_name}_tagged_entries", set()), {int(entry)})
+                board_helper[f"{board_name}_row_count_{row}"] = board_helper.get(f"{board_name}_row_count_{row}", 0) + 1
+                board_helper[f"{board_name}_row_{row}"] = board_helper.get(f"{board_name}_row_{row}", []) + [int(entry)]
+                board_helper[f"{board_name}_col_count_{column}"] = board_helper.get(f"{board_name}_col_count_{column}", 0) + 1
+                board_helper[f"{board_name}_col_{column}"] = board_helper.get(f"{board_name}_col_{column}", []) + [int(entry)]
 
-            if board_sizes[f"{board_name}_row_count_{row}"] == board_sizes["row_len"]:
-                bingo = (board_name,"row", row, entry)
-            if board_sizes[f"{board_name}_col_count_{column}"] == board_sizes["col_len"]:
-                bingo = (board_name,"col", column, entry)
-        if bingo:
-            if bingo[1] == "row":
-                return sum(board_sizes[f"{bingo[0]}_row_{bingo[2]}"]) * int(bingo[3])
-            else:
-                return sum(board_sizes[f"{bingo[0]}_col_{bingo[2]}"]) * int(bingo[3])
+            if board_helper.get(f"{board_name}_row_count_{row}") == board_sizes["row_len"]:
+                bingos.append((board_name,"row", row, entry, board_helper[f"{board_name}_tagged_entries"]))
+            if board_helper.get(f"{board_name}_col_count_{column}") == board_sizes["col_len"]:
+                bingos.append((board_name,"col", column, entry, board_helper[f"{board_name}_tagged_entries"]))
+    if bingos != []:
+        if not only_return_last:
+            bingo = bingos[0]
+        else:
+            bingoset = set()
+            latest_bingo = None
+            for bingo in bingos:
+                if bingo[0] not in bingoset:
+                    bingoset.add(bingo[0])
+                    latest_bingo=bingo
+                if len(bingoset) == len(boards):
+                    break
+            bingo=latest_bingo
+
+        return sum([
+            int(key) for key in boards[bingo[0]]["board"]
+            if int(key) not in bingo[4]
+        ]) * int(bingo[3])
 
 i4 = input_opener("4.txt", "\n", str)
-print(day_4_1(i4))
+# print(day_4(i4))
+print(day_4(i4,True))
