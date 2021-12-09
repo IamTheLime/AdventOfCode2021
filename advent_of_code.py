@@ -197,5 +197,5 @@ def day_4(inpt, only_return_last = False):
         ]) * int(bingo[3])
 
 i4 = input_opener("4.txt", "\n", str)
-# print(day_4(i4))
+print(day_4(i4))
 print(day_4(i4,True))
