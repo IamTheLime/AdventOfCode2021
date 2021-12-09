@@ -205,20 +205,17 @@ def get_ranges(inpt, count_diagonals):
     for line in inpt:
         m = re.match(r"(?P<x1>[0-9]+),(?P<y1>[0-9]+) \-\> (?P<x2>[0-9]+),(?P<y2>[0-9]+)", line)
         entry_dict = m.groupdict()
-        if entry_dict["x1"] == entry_dict["x2"]:
-            ranges += list(product([int(entry_dict["x1"])], list(range(min(int(entry_dict["y1"]),int(entry_dict["y2"])), max(int(entry_dict["y1"])+1,int(entry_dict["y2"])+1)))))
-        elif entry_dict["y1"] == entry_dict["y2"]:
-            ranges += list(product(list(range(min(int(entry_dict["x1"]),int(entry_dict["x2"])), max(int(entry_dict["x1"])+1,int(entry_dict["x2"])+1))), [int(entry_dict["y1"])]))
-        elif count_diagonals and (int(entry_dict["y2"]) - int(entry_dict["y1"])) / (int(entry_dict["x2"]) - int(entry_dict["x1"])) in [1,-1]:
-            b = int(entry_dict["y1"])/int(entry_dict["x1"]) - (int(entry_dict["y2"]) - int(entry_dict["y1"]))/(int(entry_dict["x2"]) - int(entry_dict["x1"]))
-            for x, y in product(
-                list(range(min(int(entry_dict["x1"]),int(entry_dict["x2"])), max(int(entry_dict["x1"])+1,int(entry_dict["x2"])+1))),
-                list(range(min(int(entry_dict["y1"]),int(entry_dict["y2"])), max(int(entry_dict["y1"])+1,int(entry_dict["y2"])+1)))
-            ):
-                m = (y-b)/x
-                if m in [-1,1]:
-                    ranges.append((x,y))
-
+        (x1, x2, y1, y2) = (int(entry_dict["x1"]), int(entry_dict["x2"]), int(entry_dict["y1"]), int(entry_dict["y2"]))
+        if x1 == x2:
+            ranges += list(product([x1], list(range(min(y1,y2), max(y1+1,y2+1)))))
+        elif y1 == y2:
+            ranges += list(product(list(range(min(x1,x2), max(x1+1,x2+1))), [y1]))
+        elif count_diagonals and (m := (y2 - y1) / (x2 - x1)) in [1,-1]:
+            start_x, start_y, end_x, end_y = (x1, y1, x2, y2) if x1 < x2 else (x2, y2, x1, y1)
+            while (start_x, start_y) <= (end_x, end_y):
+                ranges.append((start_x, start_y))
+                start_x = start_x +1
+                start_y = start_y + m * 1
     return(ranges)
 
 def day_5(inpt, count_diagonals=False):
@@ -229,4 +226,4 @@ def day_5(inpt, count_diagonals=False):
 
 i5 = input_opener("5.txt", "\n", str)
 print(day_5(i5))
-# print(day_5(i5,True))
+print(day_5(i5,True))
