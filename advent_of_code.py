@@ -2,14 +2,13 @@
 
 import math
 import functools
+from itertools import product
 import os
 from pprint import pprint
 import re
 import traceback
 from typing import Dict, List, Tuple
 
-os.chdir('/Users/tiagolima/Documents/personal_repos/AdventOfCode2021')
-# Just some aux shit
 
 def input_opener(filename, sep, as_type):
     try:
@@ -199,3 +198,35 @@ def day_4(inpt, only_return_last = False):
 i4 = input_opener("4.txt", "\n", str)
 print(day_4(i4))
 print(day_4(i4,True))
+
+
+def get_ranges(inpt, count_diagonals):
+    ranges = []
+    for line in inpt:
+        m = re.match(r"(?P<x1>[0-9]+),(?P<y1>[0-9]+) \-\> (?P<x2>[0-9]+),(?P<y2>[0-9]+)", line)
+        entry_dict = m.groupdict()
+        if entry_dict["x1"] == entry_dict["x2"]:
+            ranges += list(product([int(entry_dict["x1"])], list(range(min(int(entry_dict["y1"]),int(entry_dict["y2"])), max(int(entry_dict["y1"])+1,int(entry_dict["y2"])+1)))))
+        elif entry_dict["y1"] == entry_dict["y2"]:
+            ranges += list(product(list(range(min(int(entry_dict["x1"]),int(entry_dict["x2"])), max(int(entry_dict["x1"])+1,int(entry_dict["x2"])+1))), [int(entry_dict["y1"])]))
+        elif count_diagonals and (int(entry_dict["y2"]) - int(entry_dict["y1"])) / (int(entry_dict["x2"]) - int(entry_dict["x1"])) in [1,-1]:
+            b = int(entry_dict["y1"])/int(entry_dict["x1"]) - (int(entry_dict["y2"]) - int(entry_dict["y1"]))/(int(entry_dict["x2"]) - int(entry_dict["x1"]))
+            for x, y in product(
+                list(range(min(int(entry_dict["x1"]),int(entry_dict["x2"])), max(int(entry_dict["x1"])+1,int(entry_dict["x2"])+1))),
+                list(range(min(int(entry_dict["y1"]),int(entry_dict["y2"])), max(int(entry_dict["y1"])+1,int(entry_dict["y2"])+1)))
+            ):
+                m = (y-b)/x
+                if m in [-1,1]:
+                    ranges.append((x,y))
+
+    return(ranges)
+
+def day_5(inpt, count_diagonals=False):
+    overlay = {}
+    for entry in get_ranges(inpt, count_diagonals):
+        overlay[entry] = overlay.get(entry,0) + 1
+    return functools.reduce(lambda acc, curr_value: acc + (1 if curr_value > 1 else 0) , overlay.values() ,0)
+
+i5 = input_opener("5.txt", "\n", str)
+print(day_5(i5))
+# print(day_5(i5,True))
