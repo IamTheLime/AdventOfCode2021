@@ -13,7 +13,9 @@ from typing import Dict, List, Tuple
 def input_opener(filename, sep, as_type):
     try:
         with open(filename) as file:
-            return [as_type(entry) for entry in file.read().split(sep)[:-1]]
+            inpt = file.read()
+            inpt = inpt[0:-1] if inpt[-1] == "\n" else inpt
+            return [as_type(entry) for entry in inpt.split(sep)]
     except Exception as e:
         print(traceback.format_exc())
 
@@ -227,3 +229,37 @@ def day_5(inpt, count_diagonals=False):
 i5 = input_opener("5.txt", "\n", str)
 print(day_5(i5))
 print(day_5(i5,True))
+
+
+def day_6(inpt, days):
+    for delta in range(1,days+1):
+        new_entries = []
+        for index, entry in enumerate(inpt):
+            if inpt[index] == 0:
+                new_entries.append(8)
+
+            inpt[index] = entry - 1 if entry > 0 else 6
+        inpt += new_entries
+    return len(inpt)
+
+
+def day_6(inpt, days):
+    current_num_fishes = len(inpt)
+    spawn_scheduler = {}
+    for fish_counter in inpt:
+        spawn_scheduler[fish_counter + 1] = spawn_scheduler.get(fish_counter + 1, 0) + 1
+
+    for day in range(1, days+1):
+        births = spawn_scheduler.get(day, 0)
+        current_num_fishes += births
+        spawn_scheduler[day + 8 + 1] =   spawn_scheduler.get(day + 8 + 1, 0) + births
+        spawn_scheduler[day + 6 + 1] =   spawn_scheduler.get(day + 6 + 1, 0) + births
+
+    return current_num_fishes
+
+
+
+i6 = input_opener("6.txt", ",", int)
+print(day_6(i6, 80))
+print(day_6(i6, 256))
+
