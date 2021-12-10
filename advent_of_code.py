@@ -251,3 +251,32 @@ i6 = input_opener("6.txt", ",", int)
 print(day_6(i6, 80))
 print(day_6(i6, 256))
 
+
+def get_costs(end_position, curr_position):
+    pos_diff = abs(end_position - curr_position)
+    retval = 0
+    for i in range(0,pos_diff):
+        retval = retval + (i + 1)
+    return retval
+
+def day_7(inpt, part = "1"):
+    low, high = min(inpt), max(inpt)
+
+
+    crabs = {f"{crab}_{index}":[] for index,crab in enumerate(inpt)}
+
+    if part == "1":
+        for position in range(low, high+1):
+            crabs = {key: value + [abs(position -  int(key.split("_")[0]))] for (key,value) in crabs.items()}
+    else:
+        for position in range(low, high+1):
+            crabs = {key: value + [get_costs(position,int(key.split("_")[0]))] for (key,value) in crabs.items()}
+
+    costs_per_pos = [sum(elements) for elements in list(zip(*crabs.values()))]
+
+    return min(costs_per_pos)
+
+i7 = input_opener("7.txt", ",", int)
+# print(day_7(i7))
+print(day_7(i7,"2"))
+
