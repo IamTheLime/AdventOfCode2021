@@ -284,6 +284,6 @@ def day_7(inpt, part = "1"):
 
 i7 = input_opener("7.txt", ",", int)
 # I am very ashamed of this but sometimes you got to do what you got to do
-print(day_7(i7))
-print(day_7(i7,"2"))
+# print(day_7(i7))
+# print(day_7(i7,"2"))
 
