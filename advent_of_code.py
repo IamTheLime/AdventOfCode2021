@@ -262,21 +262,21 @@ def get_costs(end_position, curr_position):
 def day_7(inpt, part = "1"):
     low, high = min(inpt), max(inpt)
 
-
-    crabs = {f"{crab}_{index}":[] for index,crab in enumerate(inpt)}
+    min_sum = math.inf
 
     if part == "1":
         for position in range(low, high+1):
-            crabs = {key: value + [abs(position -  int(key.split("_")[0]))] for (key,value) in crabs.items()}
+            curr_sum = sum(abs(position -  int(crab)) for crab in inpt)
+            min_sum = curr_sum if curr_sum < min_sum else min_sum
     else:
         for position in range(low, high+1):
-            crabs = {key: value + [get_costs(position,int(key.split("_")[0]))] for (key,value) in crabs.items()}
+            curr_sum = sum(get_costs(position, int(crab)) for crab in inpt)
+            min_sum = curr_sum if curr_sum < min_sum else min_sum
 
-    costs_per_pos = [sum(elements) for elements in list(zip(*crabs.values()))]
-
-    return min(costs_per_pos)
+    return min_sum
 
 i7 = input_opener("7.txt", ",", int)
-# print(day_7(i7))
+# I am very ashamed of this but sometimes you got to do what you got to do
+print(day_7(i7))
 print(day_7(i7,"2"))
 
