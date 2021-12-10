@@ -232,18 +232,6 @@ print(day_5(i5,True))
 
 
 def day_6(inpt, days):
-    for delta in range(1,days+1):
-        new_entries = []
-        for index, entry in enumerate(inpt):
-            if inpt[index] == 0:
-                new_entries.append(8)
-
-            inpt[index] = entry - 1 if entry > 0 else 6
-        inpt += new_entries
-    return len(inpt)
-
-
-def day_6(inpt, days):
     current_num_fishes = len(inpt)
     spawn_scheduler = {}
     for fish_counter in inpt:
