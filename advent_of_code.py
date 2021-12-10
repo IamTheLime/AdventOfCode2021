@@ -251,13 +251,20 @@ i6 = input_opener("6.txt", ",", int)
 print(day_6(i6, 80))
 print(day_6(i6, 256))
 
+memo_cache = {}
+def get_costs(pos_diff):
+    if pos_diff in memo_cache:
+        return memo_cache[pos_diff]
 
-def get_costs(end_position, curr_position):
-    pos_diff = abs(end_position - curr_position)
     retval = 0
-    for i in range(0,pos_diff):
-        retval = retval + (i + 1)
+    for i in range(pos_diff,0,-1):
+        if i in memo_cache:
+            memo_cache[pos_diff] = memo_cache[i] + retval
+            return memo_cache[pos_diff]
+        else:
+            retval += i
     return retval
+
 
 def day_7(inpt, part = "1"):
     low, high = min(inpt), max(inpt)
@@ -270,7 +277,7 @@ def day_7(inpt, part = "1"):
             min_sum = curr_sum if curr_sum < min_sum else min_sum
     else:
         for position in range(low, high+1):
-            curr_sum = sum(get_costs(position, int(crab)) for crab in inpt)
+            curr_sum = sum(get_costs(abs(position - int(crab))) for crab in inpt)
             min_sum = curr_sum if curr_sum < min_sum else min_sum
 
     return min_sum
