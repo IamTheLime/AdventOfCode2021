@@ -7,7 +7,7 @@ import os
 from pprint import pprint
 import re
 import traceback
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, final
 
 
 def input_opener(filename, sep, as_type):
@@ -287,3 +287,137 @@ i7 = input_opener("7.txt", ",", int)
 # print(day_7(i7))
 # print(day_7(i7,"2"))
 
+
+def get_8_entries(inpt):
+    entries = []
+    for line in inpt:
+        prefix, sample = line.split("|")
+        entries.append((prefix.rstrip().split(" "), sample.lstrip().split(" ")))
+    return entries
+
+def day_8_1(inpt):
+    entries = get_8_entries(inpt)
+    count = 0
+    for _, sample in entries:
+        for digits in sample:
+            if len(digits) in [2, 3, 4, 7]:
+                count+=1
+
+    return count
+
+
+def set_checker(current_set: set, current_circuit: str):
+    if len(current_set) == 0:
+        return set(current_circuit)
+    else:
+        return current_set.intersection(set(current_circuit))
+
+def day_8_2(inpt):
+    entries = get_8_entries(inpt)
+    count = 0
+
+    # This is how I think of the lines as I find it hard to reason about using the original
+    # values mapped to letters
+    #   1
+    # 2   3
+    #   4
+    # 5   6
+    #   7
+
+    generate_dict = lambda: ( {
+        1: set(),
+        2: set(),
+        3: set(),
+        4: set(),
+        5: set(),
+        6: set(),
+        7: set(),
+    })
+    count = 0
+    for prefix, sample in entries:
+        mapping = generate_dict()
+        for string in prefix + sample:
+            if len(string) == 2:
+                mapping[3] = set_checker(mapping[3], string)
+                mapping[6] = set_checker(mapping[6], string)
+            elif len(string) == 4:
+                mapping[2] = set_checker(mapping[2], string)
+                mapping[3] = set_checker(mapping[3], string)
+                mapping[4] = set_checker(mapping[4], string)
+                mapping[6] = set_checker(mapping[6], string)
+            elif len(string) == 3:
+                mapping[1] = set_checker(mapping[1], string)
+                mapping[3] = set_checker(mapping[3], string)
+                mapping[6] = set_checker(mapping[6], string)
+            elif len(string) == 5:
+                mapping[4] = set_checker(mapping[4], string)
+                mapping[7] = set_checker(mapping[7], string)
+            elif len(string) == 6:
+                mapping[1] = set_checker(mapping[1], string)
+                mapping[2] = set_checker(mapping[2], string)
+                mapping[6] = set_checker(mapping[6], string)
+                mapping[7] = set_checker(mapping[7], string)
+            elif len(string) == 7:
+                mapping[1] = set_checker(mapping[1], string)
+                mapping[2] = set_checker(mapping[2], string)
+                mapping[3] = set_checker(mapping[3], string)
+                mapping[4] = set_checker(mapping[4], string)
+                mapping[5] = set_checker(mapping[5], string)
+                mapping[6] = set_checker(mapping[6], string)
+                mapping[7] = set_checker(mapping[7], string)
+        crack_mapping =True
+        while crack_mapping:
+            entered = True
+            certain_entries = [next(iter(entry)) for entry in mapping.values() if len(entry) ==1]
+            for k, potential_entries in mapping.items():
+                if len(potential_entries) > 1:
+                    for found_entry in certain_entries:
+                        if found_entry in potential_entries:
+                            potential_entries.remove(found_entry)
+                            mapping[k]=potential_entries
+            crack_mapping = False if [1,1,1,1,1,1,1] == [len(entry) for entry in mapping.values()] else True
+
+        mapping = {next(iter(v)): str(k) for k, v in mapping.items()}
+        number_sets = {
+            "36": "1",
+
+            "2346": "4",
+
+            "136": "7",
+
+            "1234567": "8",
+
+            "123567": "0",
+            "123467": "9",
+            "124567": "6",
+
+            "13457": "2",
+            "13467": "3",
+            "12467": "5",
+
+        }
+        final_number = ""
+        for entry in sample:
+            final_number += number_sets[
+                "".join(sorted([mapping[letter] for letter in entry]))
+            ]
+
+        count += int(final_number)
+
+    return count
+
+
+i8 = input_opener("8.txt", "\n", str)
+print(day_8_1(i8))
+print(day_8_2(i8))
+
+
+def day_9(inpt):
+    mins_list = []
+    for row_idx, row in enumerate(inpt):
+        for col_idx, col_value in enumerate(row):
+            []
+
+
+i9 = input_opener("9.txt", "\n", int)
+print(day_9(i9))
