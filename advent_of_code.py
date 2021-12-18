@@ -497,10 +497,17 @@ def flash(matrix):
     return flash_count
 
 
-def day_11(inpt, max_iterations = 1):
+def day_11(inpt, max_iterations = 1, part_2 = False):
     flash_count = 0
     iterations = 0
     while iterations < max_iterations:
+        if part_2:
+            count = 0
+            for row_i, col_i, value in iterate_matrix(inpt):
+                count += value
+            if count == 0:
+                return iterations
+
         iterations+=1
         sum_octo(inpt)
         attempt_flashing = True
@@ -514,5 +521,7 @@ def day_11(inpt, max_iterations = 1):
 
     return flash_count
 
-i11 =  [[int(letter) for letter in element] for element in input_opener("11.txt", "\n", str)]
+i11 =  [[int(letter) for letter in element] for element in input_opener("11_small.txt", "\n", str)]
 print(day_11(i11, 100))
+i11 =  [[int(letter) for letter in element] for element in input_opener("11.txt", "\n", str)]
+print(day_11(i11, 1000, True))
