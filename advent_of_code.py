@@ -435,3 +435,83 @@ def day_9(inpt):
 
 i9 = [[int(letter) for letter in element] for element in input_opener("9.txt", "\n", str)]
 print(day_9(i9))
+
+def day_10(inpt):
+    count = 0
+    character_scores = {
+        ")": 3,
+        "]": 57,
+        "}": 1197,
+        ">": 25137,
+    }
+
+    for line in inpt:
+        expected = []
+        for character in line:
+            if character == "(":
+                expected.append(")")
+            elif character == "[":
+                expected.append("]")
+            elif character == "{":
+                expected.append("}")
+            elif character == "<":
+                expected.append(">")
+            elif character != expected[-1]:
+                # Uncomment for some helpful printing
+                # print(f"Expected {expected[-1]}, but found {character} instead")
+                count += character_scores[character]
+                break
+            else:
+                expected.pop()
+    return count
+
+i10 =  input_opener("10.txt", "\n", str)
+print(day_10(i10))
+
+def iterate_matrix(inpt):
+    for row_i, entry in enumerate(inpt):
+        for col_i, value in enumerate(entry):
+            yield row_i, col_i, value
+
+
+def sum_octo(matrix):
+    for row_i, col_i, value in iterate_matrix(matrix):
+        matrix[row_i][col_i] = value + 1
+
+def flash(matrix):
+    flash_count = 0
+    for row_i, col_i, value in iterate_matrix(matrix):
+        if value == 10:
+            flash_count += 1
+            matrix[row_i][col_i] = value + 1
+            # If we reached 10 we should flash and increase neighbours
+            for kernel_row, kernel_col in product(
+                list(range(row_i-1, row_i+2)),
+                list(range(col_i-1, col_i+2))
+            ):
+                if len(matrix) > kernel_row >= 0 and len(matrix[0]) > kernel_col >= 0:
+                    if matrix[kernel_row][kernel_col] < 10:
+                        matrix[kernel_row][kernel_col] = 1 + matrix[kernel_row][kernel_col]
+
+    return flash_count
+
+
+def day_11(inpt, max_iterations = 1):
+    flash_count = 0
+    iterations = 0
+    while iterations < max_iterations:
+        iterations+=1
+        sum_octo(inpt)
+        attempt_flashing = True
+        while attempt_flashing:
+            current_flash = flash(inpt)
+            flash_count += current_flash
+            attempt_flashing = True if current_flash > 0 else False
+        for row_i, col_i, value in iterate_matrix(inpt):
+            if value == 11:
+                inpt[row_i][col_i] = 0
+
+    return flash_count
+
+i11 =  [[int(letter) for letter in element] for element in input_opener("11.txt", "\n", str)]
+print(day_11(i11, 100))
