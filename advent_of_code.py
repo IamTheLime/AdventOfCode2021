@@ -414,6 +414,7 @@ print(day_8_2(i8))
 
 def day_9(inpt):
     mins_list = []
+    bad_idxs = []
     for row_idx, row in enumerate(inpt):
         for col_idx, col_value in enumerate(row):
             is_minimum = True
@@ -421,14 +422,14 @@ def day_9(inpt):
                 for kernel_col in (kernel_cols := list(range(col_idx-1, col_idx+2))):
                     if (
                         (row_idx, col_idx) == (kernel_row, kernel_col) or
-                        (row_idx != kernel_row and col_idx != kernel_col)
+                        (row_idx != kernel_row and col_idx != kernel_col) or
+                        kernel_row < 0 or kernel_row >= len(row) or
+                        kernel_col < 0 or kernel_col >= len(inpt)
                     ):
-                        continue
-                    try:
+                        "do nothing"
+                    else:
                         if inpt[kernel_row][kernel_col] <= col_value:
                             is_minimum = False
-                    except IndexError:
-                        "do not care about this one"
             if is_minimum:
                 mins_list.append(col_value)
     return sum([1+minimum for minimum in mins_list])
