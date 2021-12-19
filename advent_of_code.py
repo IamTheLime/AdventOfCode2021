@@ -7,6 +7,7 @@ import os
 from pprint import pprint
 import re
 import traceback
+import json
 from typing import Dict, List, Tuple, final
 
 
@@ -521,7 +522,52 @@ def day_11(inpt, max_iterations = 1, part_2 = False):
 
     return flash_count
 
-i11 =  [[int(letter) for letter in element] for element in input_opener("11_small.txt", "\n", str)]
+i11 =  [[int(letter) for letter in element] for element in input_opener("11.txt", "\n", str)]
 print(day_11(i11, 100))
 i11 =  [[int(letter) for letter in element] for element in input_opener("11.txt", "\n", str)]
 print(day_11(i11, 1000, True))
+
+
+def flood(graph, current_node):
+    return list(product([current_node], graph.get(current_node, [])))
+
+
+def generate_traversal_graph(inpt):
+    graph = {}
+    for entry in inpt:
+        graph[entry[0]] = graph.get(entry[0], []) + [entry[1]]
+        if entry[0] != "start" and entry[1] != "end":
+            graph[entry[1]] = graph.get(entry[1], []) + [entry[0]]
+    return graph
+
+
+def can_suffix_paths(entry, suffix):
+    # check if suffix has small caves already present in entry
+    for cave in suffix[1:]:
+        if cave in entry and re.match(r"[a-z]+", cave):
+            return False
+
+    return True
+
+
+def day_12(inpt):
+    last_flooding_length = 0
+    graph = generate_traversal_graph(inpt)
+    flooding = flood(graph, "start")
+
+    while last_flooding_length < len(flooding):
+        last_flooding_length = len(flooding)
+        test = "test"
+        for entry in flooding:
+            subsequent_paths = flood(graph, entry[-1])
+            test = test
+            for suffix in subsequent_paths:
+                if can_suffix_paths(entry, suffix) and (*entry, *suffix[1:]) not in flooding:
+                    flooding.append((*entry, *suffix[1:]))
+
+    finished_paths = [item for item in flooding if item[0] == "start" and item[-1] == "end"]
+    return len(finished_paths)
+
+
+i12 = [element.split('-') for element in input_opener("12.txt", "\n", str)]
+# print(day_12(i12))
