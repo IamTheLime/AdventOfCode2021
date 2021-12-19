@@ -474,17 +474,24 @@ print(day_9(i9))
 print(day_9(i9, "part_2"))
 
 
-def day_10(inpt):
+def day_10(inpt, part = "part_1"):
     count = 0
+    count_part_2 = []
     character_scores = {
         ")": 3,
         "]": 57,
         "}": 1197,
         ">": 25137,
     }
-
+    character_scores_pt2 = {
+        ")": 1,
+        "]": 2,
+        "}": 3,
+        ">": 4,
+    }
     for line in inpt:
         expected = []
+        broke_by_error = False
         for character in line:
             if character == "(":
                 expected.append(")")
@@ -497,15 +504,20 @@ def day_10(inpt):
             elif character != expected[-1]:
                 # Uncomment for some helpful printing
                 # print(f"Expected {expected[-1]}, but found {character} instead")
+                broke_by_error = True
                 count += character_scores[character]
                 break
             else:
                 expected.pop()
-    return count
+        if len(expected) > 0 and not broke_by_error:
+            count_part_2.append(functools.reduce(lambda acc, cr: acc * 5 + character_scores_pt2[cr], reversed(expected), 0))
+
+    return count if part == "part_1" else sorted(count_part_2)[len(count_part_2)//2]
 
 i10 =  input_opener("10.txt", "\n", str)
 print(f"{Fore.GREEN}Exercise 10:{Style.RESET_ALL}")
 print(day_10(i10))
+print(day_10(i10, "part_2"))
 
 def iterate_matrix(inpt):
     for row_i, entry in enumerate(inpt):
