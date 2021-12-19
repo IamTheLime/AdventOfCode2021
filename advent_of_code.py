@@ -535,9 +535,18 @@ def flood(graph, current_node):
 def generate_traversal_graph(inpt):
     graph = {}
     for entry in inpt:
-        graph[entry[0]] = graph.get(entry[0], []) + [entry[1]]
-        if entry[0] != "start" and entry[1] != "end":
+        if entry[0] == "start":
+            graph[entry[0]] = graph.get(entry[0], []) + [entry[1]]
+        elif entry[1] == "start":
             graph[entry[1]] = graph.get(entry[1], []) + [entry[0]]
+        elif entry[1] == "end":
+            graph[entry[0]] = graph.get(entry[0], []) + [entry[1]]
+        elif entry[0] == "end":
+            graph[entry[1]] = graph.get(entry[1], []) + [entry[0]]
+        elif entry[0] not in ["start", "end"] and entry[1] not in ["start","end"]:
+            graph[entry[0]] = graph.get(entry[0], []) + [entry[1]]
+            graph[entry[1]] = graph.get(entry[1], []) + [entry[0]]
+
     return graph
 
 
@@ -553,21 +562,48 @@ def can_suffix_paths(entry, suffix):
 def day_12(inpt):
     last_flooding_length = 0
     graph = generate_traversal_graph(inpt)
-    flooding = flood(graph, "start")
+    flooding = set(flood(graph, "start"))
 
     while last_flooding_length < len(flooding):
         last_flooding_length = len(flooding)
-        test = "test"
-        for entry in flooding:
+        for entry in flooding.copy():
             subsequent_paths = flood(graph, entry[-1])
-            test = test
             for suffix in subsequent_paths:
-                if can_suffix_paths(entry, suffix) and (*entry, *suffix[1:]) not in flooding:
-                    flooding.append((*entry, *suffix[1:]))
+                if can_suffix_paths(entry, suffix):
+                    flooding.add((*entry, *suffix[1:]))
 
     finished_paths = [item for item in flooding if item[0] == "start" and item[-1] == "end"]
     return len(finished_paths)
 
 
+def suffix_paths(flooding, entry, suffix):
+    # check if suffix has small caves already present in entry
+    has_visited_sc_twice = entry[1]
+    for cave in suffix[1:]:
+        if has_visited_sc_twice and cave in entry[0] and re.match(r"[a-z]+", cave):
+            return
+        elif cave in entry[0] and re.match(r"[a-z]+", cave):
+            has_visited_sc_twice = True
+
+    flooding.add(((*entry[0], *suffix[1:]), has_visited_sc_twice))
+
+
+def day_12_2(inpt):
+    last_flooding_length = 0
+    graph = generate_traversal_graph(inpt)
+    flooding = set([(entry, False) for entry in flood(graph, "start")])
+
+    while last_flooding_length < len(flooding):
+        last_flooding_length = len(flooding)
+        for entry in flooding.copy():
+            subsequent_paths = flood(graph, entry[0][-1])
+            for suffix in subsequent_paths:
+                suffix_paths(flooding, entry, suffix)
+
+    finished_paths = [item for item in flooding if item[0][0] == "start" and item[0][-1] == "end"]
+    return len(finished_paths)
+
+
 i12 = [element.split('-') for element in input_opener("12.txt", "\n", str)]
-# print(day_12(i12))
+print(day_12(i12))
+# print(day_12_2(i12))
