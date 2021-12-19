@@ -3,13 +3,10 @@
 import math
 import functools
 from itertools import product
-import os
-from pprint import pprint
 import re
 import traceback
-import json
-from typing import Dict, List, Tuple, final
-
+from typing import Dict, List, Tuple
+from colorama import Fore, Style
 
 def input_opener(filename, sep, as_type):
     try:
@@ -48,7 +45,7 @@ def day_1(day_1_list: List) -> int:
         (day_1_list[0], 0)
     )[1]
 
-
+print(f"{Fore.GREEN}Exercise 1:{Style.RESET_ALL}")
 i1 = input_opener("1.txt", "\n", int)
 print(day_1(i1))
 
@@ -95,6 +92,7 @@ def day_2(day_2_list: List, calculator) -> int:
 
 
 i2 = [(entry.split(" ")[0], int(entry.split(" ")[1])) for entry in input_opener("2.txt", "\n", str)]
+print(f"{Fore.GREEN}Exercise 2:{Style.RESET_ALL}")
 print(day_2(i2, depth_calculator))
 print(day_2(i2, aim_calculator))
 
@@ -140,6 +138,7 @@ def day_3_1(day_3_matrix_original) -> int:
 
 
 i3 = input_opener("3.txt", "\n", lambda x: [int(y) for y in list(x)])
+print(f"{Fore.GREEN}Exercise 3:{Style.RESET_ALL}")
 print(day_3(i3))
 print(day_3_1(i3))
 
@@ -199,6 +198,7 @@ def day_4(inpt, only_return_last = False):
         ]) * int(bingo[3])
 
 i4 = input_opener("4.txt", "\n", str)
+print(f"{Fore.GREEN}Exercise 4:{Style.RESET_ALL}")
 print(day_4(i4))
 print(day_4(i4,True))
 
@@ -228,6 +228,7 @@ def day_5(inpt, count_diagonals=False):
     return functools.reduce(lambda acc, curr_value: acc + (1 if curr_value > 1 else 0) , overlay.values() ,0)
 
 i5 = input_opener("5.txt", "\n", str)
+print(f"{Fore.GREEN}Exercise 5:{Style.RESET_ALL}")
 print(day_5(i5))
 print(day_5(i5,True))
 
@@ -249,6 +250,7 @@ def day_6(inpt, days):
 
 
 i6 = input_opener("6.txt", ",", int)
+print(f"{Fore.GREEN}Exercise 6:{Style.RESET_ALL}")
 print(day_6(i6, 80))
 print(day_6(i6, 256))
 
@@ -285,6 +287,8 @@ def day_7(inpt, part = "1"):
 
 i7 = input_opener("7.txt", ",", int)
 # I am very ashamed of this but sometimes you got to do what you got to do
+print(f"{Fore.GREEN}Exercise 7:{Style.RESET_ALL}")
+print("Very ashamed of this one which takes a few mins to run so do not print")
 # print(day_7(i7))
 # print(day_7(i7,"2"))
 
@@ -409,13 +413,38 @@ def day_8_2(inpt):
 
 
 i8 = input_opener("8.txt", "\n", str)
+print(f"{Fore.GREEN}Exercise 8:{Style.RESET_ALL}")
 print(day_8_1(i8))
 print(day_8_2(i8))
 
+def find_basin(inpt, start_row_idx, start_col_idx):
+    basin_list = set()
+    basin_number_searched = {(start_row_idx, start_col_idx)}
+    basin_number_searcher = {(start_row_idx, start_col_idx)}
 
-def day_9(inpt):
+    while len(basin_number_searcher) > 0:
+        row_idx, col_idx = basin_number_searcher.pop()
+        for kernel_row in range(row_idx-1, row_idx+2):
+            for kernel_col in range(col_idx-1, col_idx+2):
+                if (
+                    (row_idx, col_idx) == (kernel_row, kernel_col) or
+                    (row_idx != kernel_row and col_idx != kernel_col) or
+                    kernel_row < 0 or kernel_row >= len(inpt) or
+                    kernel_col < 0 or kernel_col >= len(inpt[0])
+                ):
+                    "do nothing"
+                else:
+                    if inpt[kernel_row][kernel_col] != 9 and inpt[kernel_row][kernel_col] >= inpt[row_idx][col_idx]:
+                        basin_list.add((kernel_row, kernel_col))
+                        if (kernel_row, kernel_col) not in basin_number_searched:
+                            basin_number_searched.add((kernel_row, kernel_col))
+                            basin_number_searcher.add((kernel_row, kernel_col))
+
+    return(len(basin_list)+1)
+
+def day_9(inpt, part="part_1"):
     mins_list = []
-    bad_idxs = []
+    basins = []
     for row_idx, row in enumerate(inpt):
         for col_idx, col_value in enumerate(row):
             is_minimum = True
@@ -424,19 +453,26 @@ def day_9(inpt):
                     if (
                         (row_idx, col_idx) == (kernel_row, kernel_col) or
                         (row_idx != kernel_row and col_idx != kernel_col) or
-                        kernel_row < 0 or kernel_row >= len(row) or
-                        kernel_col < 0 or kernel_col >= len(inpt)
+                        kernel_row < 0 or kernel_row >= len(inpt) or
+                        kernel_col < 0 or kernel_col >= len(row)
                     ):
                         "do nothing"
                     else:
                         if inpt[kernel_row][kernel_col] <= col_value:
                             is_minimum = False
             if is_minimum:
-                mins_list.append(col_value)
-    return sum([1+minimum for minimum in mins_list])
+                if part == "part_1":
+                    mins_list.append(col_value)
+                else:
+                    basins.append(find_basin(inpt, row_idx, col_idx))
+
+    return sum([1+minimum for minimum in mins_list]) if part == "part_1" else functools.reduce( lambda x,y: x*y, sorted(basins, reverse=True)[:3], 1)
 
 i9 = [[int(letter) for letter in element] for element in input_opener("9.txt", "\n", str)]
+print(f"{Fore.GREEN}Exercise 9:{Style.RESET_ALL}")
 print(day_9(i9))
+print(day_9(i9, "part_2"))
+
 
 def day_10(inpt):
     count = 0
@@ -468,6 +504,7 @@ def day_10(inpt):
     return count
 
 i10 =  input_opener("10.txt", "\n", str)
+print(f"{Fore.GREEN}Exercise 10:{Style.RESET_ALL}")
 print(day_10(i10))
 
 def iterate_matrix(inpt):
@@ -522,6 +559,7 @@ def day_11(inpt, max_iterations = 1, part_2 = False):
 
     return flash_count
 
+print(f"{Fore.GREEN}Exercise 11:{Style.RESET_ALL}")
 i11 =  [[int(letter) for letter in element] for element in input_opener("11.txt", "\n", str)]
 print(day_11(i11, 100))
 i11 =  [[int(letter) for letter in element] for element in input_opener("11.txt", "\n", str)]
@@ -605,5 +643,6 @@ def day_12_2(inpt):
 
 
 i12 = [element.split('-') for element in input_opener("12.txt", "\n", str)]
+print(f"{Fore.GREEN}Exercise 12:{Style.RESET_ALL}")
 print(day_12(i12))
 # print(day_12_2(i12))
